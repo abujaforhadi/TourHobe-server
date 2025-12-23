@@ -2,51 +2,37 @@ import { Request, Response } from "express";
 import * as travelService from "./travelPlan.service";
 import { prisma } from "../../config/db";
 
-interface AuthRequest extends Request {
-  user: {
-    id: string;
-    role: string;
-  };
-}
-
-/* ===================== CREATE PLAN ===================== */
-export async function createPlan(req: AuthRequest, res: Response) {
+export async function createPlan(req: Request, res: Response) {
   try {
-    const { id: hostId } = req.user;
-
+    const hostId = req.user?.id;
+    if (!hostId) return res.status(401).json({ success: false, message: "Authentication required" });
     const plan = await travelService.createPlan(hostId, req.body);
-
-    return res.status(201).json({
-      success: true,
-      message: "Travel plan created successfully",
-      plan,
-    });
-  } catch (error: any) {
-    return res.status(error.statusCode || 500).json({
-      success: false,
-      message: error.message || "Failed to create travel plan",
-    });
+    res.json({ success: true, plan });
+  } catch (err: any) {
+    res.status(err.statusCode || 500).json({ success: false, message: err.message || "Failed" });
   }
 }
 
-/* ===================== GET SINGLE PLAN ===================== */
 export async function getPlan(req: Request, res: Response) {
   try {
-    const plan = await travelService.getPlan(req.params.id);
-
-    return res.json({
-      success: true,
-      plan,
-    });
-  } catch (error: any) {
-    return res.status(error.statusCode || 500).json({
-      success: false,
-      message: error.message || "Travel plan not found",
-    });
+    const id = req.params.id;
+    const plan = await travelService.getPlan(id);
+    res.json({ success: true, plan });
+  } catch (err: any) {
+    res.status(err.statusCode || 500).json({ success: false, message: err.message || "Failed" });
   }
 }
 
-/* ===================== LIST PLANS (PAGINATION) ===================== */
+// export async function listPlans(req: Request, res: Response) {
+//   try {
+//     const take = Number(req.query.take) || 20;
+//     const skip = Number(req.query.skip) || 0;
+//     const plans = await travelService.listPlans(skip, take);
+//     res.json({ success: true, plans });
+//   } catch (err: any) {
+//     res.status(500).json({ success: false, message: err.message || "Failed" });
+//   }
+// }
 export async function listPlans(req: Request, res: Response) {
   try {
     const result = await travelService.listPlansWithPagination({
@@ -58,149 +44,147 @@ export async function listPlans(req: Request, res: Response) {
       endDate: req.query.endDate as string,
     });
 
-    return res.json({
-      success: true,
-      ...result,
-    });
-  } catch (error: any) {
-    return res.status(500).json({
-      success: false,
-      message: error.message || "Failed to fetch travel plans",
-    });
+    res.json({ success: true, ...result });
+  } catch (err: any) {
+    res.status(500).json({ success: false, message: err.message });
   }
 }
 
-/* ===================== MATCH PLANS ===================== */
+
 export async function match(req: Request, res: Response) {
   try {
-    const matches = await travelService.matchPlans({
-      destination: req.query.destination as string,
-      startDate: req.query.startDate as string,
-      endDate: req.query.endDate as string,
-      travelType: req.query.travelType as string,
-    });
+    const FilterQuery = {
+      destination: req.query.destination
+        ? String(req.query.destination)
+        : undefined,
+      startDate: req.query.startDate
+        ? String(req.query.startDate)
+        : undefined,
+      endDate: req.query.endDate ? String(req.query.endDate) : undefined,
+      travelType: req.query.travelType
+        ? String(req.query.travelType)
+        : undefined,
+    };
 
-    return res.json({
-      success: true,
-      matches,
-    });
-  } catch (error: any) {
-    return res.status(500).json({
-      success: false,
-      message: error.message || "Failed to match plans",
-    });
+    const matches = await travelService.matchPlans(FilterQuery);
+
+    return res.json({ success: true, matches });
+  } catch (err: any) {
+    console.error("Match error:", err);
+    res
+      .status(500)
+      .json({ success: false, message: err.message || "Failed to match plans" });
   }
 }
 
-/* ===================== DELETE PLAN ===================== */
-export async function removePlan(req: AuthRequest, res: Response) {
+export async function removePlan(req: Request, res: Response) {
   try {
-    const { id: userId, role } = req.user;
-
-    const result = await travelService.deletePlan(
-      req.params.id,
-      userId,
-      role === "ADMIN"
-    );
-
-    return res.json({
-      success: true,
-      ...result,
-    });
-  } catch (error: any) {
-    return res.status(error.statusCode || 500).json({
-      success: false,
-      message: error.message || "Failed to delete plan",
-    });
+    const id = req.params.id;
+    const userId = req.user.id;
+    const isAdmin = req.user.role === "ADMIN";
+    const result = await travelService.deletePlan(id, userId, isAdmin);
+    res.json({ success: true, ...result });
+  } catch (err: any) {
+    res.status(err.statusCode || 500).json({ success: false, message: err.message || "Failed" });
   }
 }
 
-/* ===================== UPDATE PLAN ===================== */
-export async function updatePlan(req: AuthRequest, res: Response) {
+export async function updatePlan(req: Request, res: Response) {
   try {
-    const { id: userId, role } = req.user;
+    const id = req.params.id;
+    const userId = req.user.id;
+    const isAdmin = req.user.role === "ADMIN";
 
-    const result = await travelService.updatePlan(
-      req.params.id,
-      userId,
-      req.body,
-      role === "ADMIN"
-    );
-
-    return res.json({
-      success: true,
-      message: "Plan updated successfully",
-      plan: result.plan,
-    });
-  } catch (error: any) {
-    return res.status(error.statusCode || 500).json({
-      success: false,
-      message: error.message || "Failed to update plan",
-    });
+    const result = await travelService.updatePlan(id, userId, req.body, isAdmin);
+    res.json({ success: true, ...result });
+  } catch (err: any) {
+    res
+      .status(err.statusCode || 500)
+      .json({ success: false, message: err.message || "Failed" });
+  }
+}
+export async function requestToJoin(req: Request, res: Response) {
+  try {
+    const userId = (req as any).user?.id;
+    if (!userId) {
+      return res.status(401).json({ success: false, message: "Authentication required" });
+    }
+    const planId = req.params.id;
+    const result = await travelService.requestToJoinPlan(planId, userId);
+    res.json({ success: true, ...result });
+  } catch (err: any) {
+    res
+      .status(err.statusCode || 500)
+      .json({ success: false, message: err.message || "Failed" });
   }
 }
 
-/* ===================== JOIN PLAN ===================== */
-export async function requestToJoin(req: AuthRequest, res: Response) {
-  try {
-    const result = await travelService.requestToJoinPlan(
-      req.params.id,
-      req.user.id
-    );
 
-    return res.json({
-      success: true,
-      ...result,
-    });
-  } catch (error: any) {
-    return res.status(error.statusCode || 500).json({
-      success: false,
-      message: error.message || "Failed to send join request",
-    });
-  }
-}
-
-/* ===================== RESPOND TO JOIN REQUEST ===================== */
-export async function respondParticipant(req: AuthRequest, res: Response) {
+export async function respondParticipant(req: Request, res: Response) {
   try {
+    const hostId = (req as any).user?.id;
+    if (!hostId) {
+      return res.status(401).json({ success: false, message: "Authentication required" });
+    }
+
     const { planId, participantId } = req.params;
-    const { status } = req.body;
+    const { status } = req.body; 
+
+    if (!["ACCEPTED", "REJECTED", "CANCELLED"].includes(status)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid status value" });
+    }
 
     const result = await travelService.respondToJoinRequest(
       planId,
-      req.user.id,
+      hostId,
       participantId,
       status
     );
 
-    return res.json({
-      success: true,
-      ...result,
+    res.json({ success: true, ...result });
+  } catch (err: any) {
+    res
+      .status(err.statusCode || 500)
+      .json({ success: false, message: err.message || "Failed" });
+  }
+}
+export async function getMyPlans(req: any, res: any) {
+  try {
+    const userId = req.user.id;
+
+    const plans = await prisma.travelPlan.findMany({
+      where: { hostId: userId },
+      orderBy: { createdAt: "desc" },
     });
-  } catch (error: any) {
-    return res.status(error.statusCode || 500).json({
+
+    res.json({ success: true, plans });
+  } catch (err) {
+    res.status(500).json({
       success: false,
-      message: error.message || "Failed to update request status",
+      message: "Failed to load plans",
     });
   }
 }
 
-/* ===================== GET MY PLANS ===================== */
-export async function getMyPlans(req: AuthRequest, res: Response) {
+export async function userUpdatePlan(req: any, res: any) {
   try {
-    const plans = await prisma.travelPlan.findMany({
-      where: { hostId: req.user.id },
-      orderBy: { createdAt: "desc" },
-    });
+    const userId = req.user.id;
+    const planId = req.params.id;
+    const data = req.body;
+
+    const updated = await travelService.updatePlan(planId, userId, data);
 
     return res.json({
       success: true,
-      plans,
+      message: "Plan updated successfully",
+      plan: updated.plan,
     });
-  } catch {
-    return res.status(500).json({
+  } catch (err: any) {
+    return res.status(err.statusCode || 500).json({
       success: false,
-      message: "Failed to load plans",
+      message: err.message || "Failed to update plan",
     });
   }
 }

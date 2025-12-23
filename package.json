@@ -1,12 +1,13 @@
 {
-  "name": "tourhobe-server",
+  "name": "travel-planning-server",
   "version": "1.0.0",
   "description": "",
-  "main": "dist/server.js",
+  "main": "index.js",
   "scripts": {
-    "build": "prisma generate && tsc",
+    "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "ts-node-dev --respawn --transpile-only ./src/server.ts",
-    "start": "prisma migrate deploy && node dist/server.js"
+    "postinstall": "prisma generate",
+    "build": "tsc"
   },
   "keywords": [],
   "author": "",

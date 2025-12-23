@@ -1,0 +1,125 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum TravelType {
+  SOLO
+  FAMILY
+  FRIENDS
+  COUPLE
+  GROUP
+}
+
+enum Visibility {
+  PUBLIC
+  PRIVATE
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  UNPAID
+  REFUNDED
+  FAILED
+}
+
+model User {
+  id               String   @id @default(cuid())
+  email            String   @unique
+  password         String
+  fullName         String?
+  bio              String?
+  profileImage     String?
+  travelInterests  String[] @default([])
+  visitedCountries String[] @default([])
+  currentLocation  String?
+  role             Role     @default(USER)
+  paymentStatus    PaymentStatus @default(UNPAID)
+  isPremium        Boolean  @default(false)
+  premiumExpiresAt DateTime?         
+  isVerifiedBadge  Boolean  @default(false)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  travelPlans      TravelPlan[]
+
+  reviewsGiven     Review[]  @relation("reviews_given")
+  reviewsReceived  Review[]  @relation("reviews_received")
+
+  payments         Payment[]
+
+  travelPlanParticipants TravelPlanParticipant[]
+}
+
+
+model TravelPlan {
+  id          String   @id @default(cuid())
+  title       String?
+  destination String
+  startDate   DateTime
+  endDate     DateTime
+  budgetMin   Int?
+  budgetMax   Int?
+  travelType  TravelType
+  description String?
+  visibility  Visibility @default(PUBLIC)
+
+  hostId      String
+  host        User      @relation(fields: [hostId], references: [id],onDelete: Cascade)
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  travelPlanParticipants TravelPlanParticipant[]
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  rating    Int
+  comment   String?
+  authorId  String
+  author    User     @relation("reviews_given", fields: [authorId], references: [id],onDelete: Cascade)
+  targetId  String
+  target    User     @relation("reviews_received", fields: [targetId], references: [id],onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
+
+model Payment {
+  id                 String        @id @default(cuid())
+  userId             String
+  user               User          @relation(fields: [userId], references: [id],onDelete: Cascade)
+  amount             Int
+  currency           String        @default("bdt")
+  status             PaymentStatus @default(PENDING)
+  paymentGateway     String?
+  transactionId      String?       @unique
+  sessionKey         String?       
+  gatewayTranId      String?       
+  paymentGatewayData Json?
+  description        String?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+}
+model TravelPlanParticipant {
+  id           String     @id @default(cuid())
+  travelPlanId String
+  travelPlan   TravelPlan @relation(fields: [travelPlanId], references: [id], onDelete: Cascade)
+  userId       String
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status       String     @default("PENDING") 
+  requestedAt  DateTime   @default(now())
+  respondedAt  DateTime?
+
+  @@unique([travelPlanId, userId])
+}

@@ -67,7 +67,7 @@ app.use("/api/v1",router)
 app.use(errorHandler);
 
 app.get("/", (req: Request, res: Response) => {
-  res.send("Welcome to Travel Planning Website");
+  res.send("Welcome to TourHobe server");
 });
 
 export default app;

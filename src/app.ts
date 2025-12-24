@@ -55,7 +55,7 @@ app.use(cookieParser());
 
 app.use(
   cors({
-    origin:[ "http://localhost:3000","https://www.travelbd.jafor.me"],
+    origin:[ "http://localhost:3000","https://www.travelbd.jafor.me","https://tourhobe.jafor.me"],
     credentials: true,
   })
 );
@@ -67,7 +67,7 @@ app.use("/api/v1",router)
 app.use(errorHandler);
 
 app.get("/", (req: Request, res: Response) => {
-  res.send("Welcome to TourHobe server");
+  res.send("Welcome to Tour-Hobe server");
 });
 
 export default app;

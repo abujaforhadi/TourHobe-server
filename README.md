@@ -125,9 +125,9 @@ Supports **real subscription payments** using SSLCommerz (Sandbox).
 
 | Endpoint             | Method | Description            |
 | -------------------- | ------ | ---------------------- |
-| `/api/v1/auth/register` | POST   | Register new user      |
-| `/api/v1/auth/login`    | POST   | User login             |
-| `/api/v1/auth/me`       | GET    | Logged-in user profile |
+| `/api/auth/register` | POST   | Register new user      |
+| `/api/auth/login`    | POST   | User login             |
+| `/api/auth/me`       | GET    | Logged-in user profile |
 
 ---
 
@@ -135,13 +135,13 @@ Supports **real subscription payments** using SSLCommerz (Sandbox).
 
 | Endpoint                     | Method | Description        |
 | ---------------------------- | ------ | ------------------ |
-| `/api/v1/travel-plans`          | POST   | Create travel plan |
-| `/api/v1/travel-plans/:id`      | GET    | Get travel plan    |
-| `/api/v1/travel-plans/:id`      | PATCH  | Update travel plan |
-| `/api/v1/travel-plans/:id`      | DELETE | Delete travel plan |
-| `/api/v1/travel-plans/:id/join` | POST   | Request to join    |
-| `/api/v1/travel-plans/hosted`   | GET    | User hosted plans  |
-| `/api/v1/travel-plans/joined`   | GET    | User joined plans  |
+| `/api/travel-plans`          | POST   | Create travel plan |
+| `/api/travel-plans/:id`      | GET    | Get travel plan    |
+| `/api/travel-plans/:id`      | PATCH  | Update travel plan |
+| `/api/travel-plans/:id`      | DELETE | Delete travel plan |
+| `/api/travel-plans/:id/join` | POST   | Request to join    |
+| `/api/travel-plans/hosted`   | GET    | User hosted plans  |
+| `/api/travel-plans/joined`   | GET    | User joined plans  |
 
 ---
 
@@ -149,10 +149,10 @@ Supports **real subscription payments** using SSLCommerz (Sandbox).
 
 | Endpoint                 | Method | Description            |
 | ------------------------ | ------ | ---------------------- |
-| `/api/v1/reviews/user/:id`  | GET    | Get reviews for a host |
-| `/api/v1/reviews`           | POST   | Add a review           |
-| `/api/v1/admin/reviews`     | GET    | Admin: all reviews     |
-| `/api/v1/admin/reviews/:id` | DELETE | Admin: delete review   |
+| `/api/reviews/user/:id`  | GET    | Get reviews for a host |
+| `/api/reviews`           | POST   | Add a review           |
+| `/api/admin/reviews`     | GET    | Admin: all reviews     |
+| `/api/admin/reviews/:id` | DELETE | Admin: delete review   |
 
 ---
 
@@ -160,7 +160,7 @@ Supports **real subscription payments** using SSLCommerz (Sandbox).
 
 | Endpoint              | Method | Description                     |
 | --------------------- | ------ | ------------------------------- |
-| `/api/v1/dashboard/user` | GET    | User dashboard (matches, trips) |
+| `/api/dashboard/user` | GET    | User dashboard (matches, trips) |
 
 ---
 
@@ -168,14 +168,14 @@ Supports **real subscription payments** using SSLCommerz (Sandbox).
 
 | Endpoint                              | Method   | Description        |
 | ------------------------------------- | -------- | ------------------ |
-| `/api/v1/payments/init-subscription`     | POST     | Start payment      |
-| `/api/v1/payments/success`               | GET/POST | Success callback   |
-| `/api/v1/payments/fail`                  | GET/POST | Fail callback      |
-| `/api/v1/payments/cancel`                | GET/POST | Cancel callback    |
-| `/api/v1/payments/validate-payment`      | POST     | IPN validation     |
-| `/api/v1/payments/status/:transactionId` | GET      | Payment status     |
-| `/api/v1/payments/my-transactions`       | GET      | User transactions  |
-| `/api/v1/payments/admin/transactions`    | GET      | Admin transactions |
+| `/api/payments/init-subscription`     | POST     | Start payment      |
+| `/api/payments/success`               | GET/POST | Success callback   |
+| `/api/payments/fail`                  | GET/POST | Fail callback      |
+| `/api/payments/cancel`                | GET/POST | Cancel callback    |
+| `/api/payments/validate-payment`      | POST     | IPN validation     |
+| `/api/payments/status/:transactionId` | GET      | Payment status     |
+| `/api/payments/my-transactions`       | GET      | User transactions  |
+| `/api/payments/admin/transactions`    | GET      | Admin transactions |
 
 ---
 
@@ -221,13 +221,13 @@ SALT_ROUNDS=12
 SSL_STORE_ID=your_store_id
 SSL_STORE_PASS=your_store_password
 SSL_PAYMENT_API=https://sandbox.sslcommerz.com/gwprocess/v4/api.php
-SSL_VALIDATION_API=https://sandbox.sslcommerz.com/validator/api/v1/validationserverAPI.php
+SSL_VALIDATION_API=https://sandbox.sslcommerz.com/validator/api/validationserverAPI.php
 
 # Backend Redirect URLs
-SSL_SUCCESS_BACKEND_URL=https://your-backend.com/api/v1/payments/success
-SSL_FAIL_BACKEND_URL=https://your-backend.com/api/v1/payments/fail
-SSL_CANCEL_BACKEND_URL=https://your-backend.com/api/v1/payments/cancel
-SSL_IPN_URL=https://your-backend.com/api/v1/payments/validate-payment
+SSL_SUCCESS_BACKEND_URL=https://your-backend.com/api/payments/success
+SSL_FAIL_BACKEND_URL=https://your-backend.com/api/payments/fail
+SSL_CANCEL_BACKEND_URL=https://your-backend.com/api/payments/cancel
+SSL_IPN_URL=https://your-backend.com/api/payments/validate-payment
 
 # Frontend Redirect URLs
 SSL_SUCCESS_FRONTEND_URL=https://your-frontend.com/payment-success
